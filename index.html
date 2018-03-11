@@ -2,11 +2,10 @@
 <html lang="en">
 <head>
 	<meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-	<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
-	<link rel="icon" href="/favicon.ico" type="image/x-icon">
-	<title>D3</title>
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+ 	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="shortcut icon" type='image/png' sizes="16x16" href="/favicon.png">
+	<title>SOAD on Spotify</title>
 
 	<link href="https://fonts.googleapis.com/css?family=Open+Sans|Roboto+Slab" rel="stylesheet">
 	<link href="css/bootstrap.min.css" rel="stylesheet">
@@ -40,20 +39,20 @@
 				<div class="col-md-8">
 					<h3>Node</h3>
 					<p>Each node is a band. Hover to see its name.</p>
-					<h3>Size</h3>
-					<p>The size of a node corresponds to its popularity on Spotify.</p>
 					<h3>Color</h3>
 					<p>The color corresponds to its popularity on Spotify. The darker ones are more popular. Black is SOAD.</p>
 					<h3>Groups</h3>
 					<p>Grouped bands have similar genre.</p>
-
 				</div>
-				<p>Developed by <a href="github.com/mateuslunacc/" target="_blank">Mateus Luna.<span class="icon-link-external"></span></a></p>
 			</div>
 		</div>
 	</div>
 
-	<footer></footer>
+	<footer>
+		<div class="container">
+			<p>Developed by <a href="github.com/mateuslunacc/">Mateus Luna<span class="icon-link-external"></span></a> using D3.</p>
+		</div>
+	</footer>
 
 	<!-- scripts -->
 	<script src="js/d3.v4.min.js"></script>
@@ -73,11 +72,9 @@
 
 		d3.json("soad.json", function(error, graph) {
 		  if (error) throw error;
-
-			console.dir(graph.edges);
-			console.dir(graph.nodes);
 			
-			graph.nodes = graph.nodes.filter(function (d) {return d.size > 70});
+			graph.nodes = graph.nodes.filter(function (d) {return d.size >= 70});
+
 			bands = graph.nodes.map(b => b.id);
 			graph.edges = graph.edges.filter(function (d) { 
 				return bands.includes(d.source) && bands.includes(d.target)}, bands);
@@ -85,11 +82,11 @@
 			const min = d3.min(graph.nodes,  function(d) { return d.size; });
 			const max = d3.max(graph.nodes,  function(d) { return d.size; });
 			var color =  d3.scaleOrdinal(d3.schemeOranges[4])
-    						.domain([70, 82], 3);
+    						.domain(min, max, (max-min)/4);
 
 			var simulation = d3.forceSimulation()
 			    .force("link", d3.forceLink().id(function(d) { return d.id; }))
-			    .force("charge", d3.forceManyBody().strength([-250]))
+			    .force("charge", d3.forceManyBody().strength([-200]))
 			    .force("center", d3.forceCenter(width / 2, height / 2));
 
 		  var link = svg.append("g")
@@ -104,7 +101,7 @@
 		    	.data(graph.nodes)
 		    .enter().append("circle")
 		    .filter(function(d) { return d.size })
-		      .attr("r", function(d) { return (d.size-50)/2})
+		      .attr("r", function(d) { return 12})
 		      .attr("fill", function(d) { return d.color == '#000' ? '#000' : color(d.size); })
 		      .call(d3.drag()
 		          .on("start", dragstarted)
