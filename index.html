@@ -69,6 +69,10 @@
 				.attr('viewBox', '0 0 '+width+' '+height)
 				.attr('width', '100%');
 
+		var simulation = d3.forceSimulation()
+			    .force("link", d3.forceLink().id(function(d) { return d.id; }))
+			    .force("charge", d3.forceManyBody().strength([-200]))
+			    .force("center", d3.forceCenter(width / 2, height / 2));
 
 		d3.json("soad.json", function(error, graph) {
 		  if (error) throw error;
@@ -83,11 +87,6 @@
 			const max = d3.max(graph.nodes,  function(d) { return d.size; });
 			var color =  d3.scaleOrdinal(d3.schemeOranges[4])
     						.domain(min, max, (max-min)/4);
-
-			var simulation = d3.forceSimulation()
-			    .force("link", d3.forceLink().id(function(d) { return d.id; }))
-			    .force("charge", d3.forceManyBody().strength([-200]))
-			    .force("center", d3.forceCenter(width / 2, height / 2));
 
 		  var link = svg.append("g")
 		      .attr("class", "link")
